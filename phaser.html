@@ -7,7 +7,10 @@
 <body>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/2.5.0/phaser.js"></script>
 <script>
+// tell Phaser where our functions are, initialize the canvas
 var game = new Phaser.Game(800, 600, Phaser.CANVAS, 'phaser-example', { preload: preload, create: create, update: update });
+
+// load images
 function preload() {
 
     game.stage.backgroundColor = '#85b5e1';
@@ -22,6 +25,8 @@ function preload() {
 	game.load.image('item', 'sprites/car.png');
 
 }
+
+// init some variables
 var player;
 var platforms;
 var cursors;
@@ -32,7 +37,7 @@ var platforms;
 var cursors;
 var jumpButton;
 
-var walls = [];
+// Item class
 var item = function(name, image, x) {
 	this.show = function() {
 		this.sprite = game.add.sprite(this.x, 100, this.image);
@@ -43,9 +48,17 @@ var item = function(name, image, x) {
 	this.x = x;
 	this.image = image;
 }
+
+// inventory
 var inventory = [];
 var inventory_visible = false;
 
+/*
+Checks for a collision between two sprites
+
+Parameters: Sprite spriteA, Sprite spriteB
+Returns:    boolean intersecting
+*/
 function checkOverlap(spriteA, spriteB) {
 
     var boundsA = spriteA.getBounds();
@@ -56,20 +69,22 @@ function checkOverlap(spriteA, spriteB) {
 }
 
 function create() {
-
+	// initialize inventory + player
 	inventory = [new item("steam controller", "item", 50), new item("lamp shade", "item", 82), new item("paintings", "item", 114)];
-	//inventory[1].sprite.destroy();
-
     player = game.add.sprite(0, 200, 'player');
 	
-	podiums = game.add.physicsGroup();
-	
+	// used to tell which item player is accessing, if any
 	accessing = undefined;
 	
-	// section 1
+	// initialize lists of objects
+	podiums = game.add.physicsGroup();
+	list_of_podium_hit_boxes = [];
+	
+	// create podiums
 	podium = podiums.create(100, 200, 'podium');
 	podium2 = podiums.create(150, 200, 'podium');
 	
+	// create 1st podium hit boxes
 	podium_hit_boxes = [];
 	
 	podium_hit_boxes.push(game.add.sprite(50, 200, 'podium'));
@@ -80,6 +95,9 @@ function create() {
 		podium_hit_boxes[i].alpha = 0.5;
 	}
 	
+	list_of_podium_hitboxes.push(podium_hit_boxes);
+	
+	// create 2nd podium hit boxes
 	podium2_hit_boxes = [];
 	
 	podium2_hit_boxes.push(game.add.sprite(150, 150, 'podium'));
@@ -90,21 +108,16 @@ function create() {
 		podium2_hit_boxes[i].alpha = 0.5;
 	}
 	
+	list_of_podium_hitboxes.push(podium2_hit_boxes);
+	
+	// enable some physics
 	podiums.setAll('body.immovable', true);
 
     game.physics.arcade.enable(player);
 
     player.body.collideWorldBounds = true;
-
-    /*platforms = game.add.physicsGroup();
-
-    platforms.create(500, 150, 'platform');
-    platforms.create(-200, 300, 'platform');
-    platforms.create(400, 450, 'platform');*/
-    
-
-    //platforms.setAll('body.immovable', true);
-
+	
+	// add buttons and callbacks
     cursors = game.input.keyboard.createCursorKeys();
     jumpButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
 	openButton = game.input.keyboard.addKey(Phaser.Keyboard.E);
@@ -114,14 +127,19 @@ function create() {
 
 function e_pressed() {
 	if (inventory_visible) {
+		// inventory is showing, hide the items and inventory_visible = false
 		for (var i = inventory.length-1; i >= 0; i--) {
 			inventory[i].hide();
 		}
 		inventory_visible = false;
 		
 	} else {
+		// inventory is not showing
+		
+		// check for collision between 1st podium hitboxes and player
 		for (var j = 0; j < podium_hit_boxes.length; j++) {
 			if (checkOverlap(player, podium_hit_boxes[j])) {
+				// collision detected, open inventory
 				accessing = podium;
 				inventory_visible = true;
 				for (var i = inventory.length-1; i >= 0; i--) {
@@ -131,8 +149,10 @@ function e_pressed() {
 			}
 		}
 	
+		// check for collision between 2nd podium hitboxes and player
 		for (var j = 0; j < podium2_hit_boxes.length; j++) {
 			if (checkOverlap(player, podium2_hit_boxes[j])) {
+				// collision detected, open inventory
 				accessing = podium2;
 				inventory_visible = true;
 				for (var i = inventory.length-1; i >= 0; i--) {
@@ -144,34 +164,39 @@ function e_pressed() {
 	}
 }
 
+function move() {
+	// move left + right
+	if (cursors.left.isDown)
+	{
+		player.body.velocity.x = -250;
+	}
+	else if (cursors.right.isDown)
+	{
+		player.body.velocity.x = 250;
+	}
+	
+	// move up + down
+	if (cursors.up.isDown) {
+		player.body.velocity.y = -250;
+	}
+	else if (cursors.down.isDown) {
+		player.body.velocity.y = 250;
+	}
+}
+
 function update () {
 
+	// check for collisions
     game.physics.arcade.collide(player, platforms);
 	game.physics.arcade.collide(player, podiums);
 	
+	// reset velocity so movement is constant
     player.body.velocity.x = 0;
     player.body.velocity.y = 0;
 
+	// move if inventory is closed
 	if (!inventory_visible) {
-		if (cursors.left.isDown)
-		{
-			player.body.velocity.x = -250;
-		}
-		else if (cursors.right.isDown)
-		{
-			player.body.velocity.x = 250;
-		}
-		if (cursors.up.isDown) {
-			player.body.velocity.y = -250;
-		}
-		else if (cursors.down.isDown) {
-			player.body.velocity.y = 250;
-		}
-
-		if (jumpButton.isDown && (player.body.onFloor() || player.body.touching.down))
-		{
-			player.body.velocity.y = -400;
-		}
+		move();
 	}
 }
 </script>
