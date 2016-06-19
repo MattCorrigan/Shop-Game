@@ -34,13 +34,10 @@ var jumpButton;
 
 var walls = [];
 var item = function(name, image, x) {
-	this.showing = false;
 	this.show = function() {
-		this.showing = true;
 		this.sprite = game.add.sprite(this.x, 100, this.image);
 	}
 	this.hide = function() {
-		this.showing = false;
 		this.sprite.destroy();
 	}
 	this.x = x;
