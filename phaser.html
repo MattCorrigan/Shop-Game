@@ -19,6 +19,7 @@ function preload() {
     game.load.image('platform', 'sprites/platform.png');
 	
 	game.load.image('podium', 'sprites/50x50.png');
+	game.load.image('item', 'sprites/car.png');
 
 }
 var player;
@@ -32,6 +33,18 @@ var cursors;
 var jumpButton;
 
 var walls = [];
+var item = function(name, image, x) {
+	this.show = function() {
+		this.sprite = game.add.sprite(this.x, 100, this.image);
+	}
+	this.hide = function() {
+		this.sprite.destroy();
+	}
+	this.x = x;
+	this.image = image;
+}
+var inventory = [];
+var inventory_visible = false;
 
 function checkOverlap(spriteA, spriteB) {
 
@@ -42,13 +55,10 @@ function checkOverlap(spriteA, spriteB) {
 
 }
 
-function Wall (x, y, width, height) {
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-}
 function create() {
+
+	inventory = [new item("steam controller", "item", 50), new item("lamp shade", "item", 82), new item("paintings", "item", 114)];
+	//inventory[1].sprite.destroy();
 
     player = game.add.sprite(0, 200, 'player');
 	
@@ -110,6 +120,10 @@ function update () {
 			if (checkOverlap(player, podium_hit_boxes[j]) && openButton.isDown && accessing !== podium) {
 				console.log("accessing podium");
 				accessing = podium;
+				inventory_visible = true;
+				for (var i = inventory.length-1; i >= 0; i--) {
+					inventory[i].show();
+				}
 			}
 		}
 	}
@@ -119,6 +133,10 @@ function update () {
 			if (checkOverlap(player, podium2_hit_boxes[j]) && openButton.isDown && accessing !== podium2) {
 				console.log("accessing podium2");
 				accessing = podium2;
+				inventory_visible = true;
+				for (var i = inventory.length-1; i >= 0; i--) {
+					inventory[i].show();
+				}
 			}
 		}
 	}
