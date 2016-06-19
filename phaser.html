@@ -136,29 +136,22 @@ function e_pressed() {
 	} else {
 		// inventory is not showing
 		
-		// check for collision between 1st podium hitboxes and player
-		for (var j = 0; j < podium_hit_boxes.length; j++) {
-			if (checkOverlap(player, podium_hit_boxes[j])) {
-				// collision detected, open inventory
-				accessing = podium;
-				inventory_visible = true;
-				for (var i = inventory.length-1; i >= 0; i--) {
-					inventory[i].show();
+		// loop through each list of hit boxes for each podium
+		for (var i = 0; i < list_of_podium_hit_boxes.length; i++) {
+		
+			hit_boxes = list_of_podium_hit_boxes[i];
+			
+			// check for collisions on these hitboxes
+			for (var j = 0; j < hit_boxes.length; j++) {
+				if (checkOverlap(player, hit_boxes[j])) {
+					// collision detected, open inventory
+					accessing = podiums.children[i];
+					inventory_visible = true;
+					for (var i = inventory.length-1; i >= 0; i--) {
+						inventory[i].show();
+					}
+					return;
 				}
-				return;
-			}
-		}
-	
-		// check for collision between 2nd podium hitboxes and player
-		for (var j = 0; j < podium2_hit_boxes.length; j++) {
-			if (checkOverlap(player, podium2_hit_boxes[j])) {
-				// collision detected, open inventory
-				accessing = podium2;
-				inventory_visible = true;
-				for (var i = inventory.length-1; i >= 0; i--) {
-					inventory[i].show();
-				}
-				return;
 			}
 		}
 	}
