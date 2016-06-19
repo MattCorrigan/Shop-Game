@@ -17,6 +17,8 @@ function preload() {
 
     game.load.image('player', 'sprites/phaser-dude.png');
     game.load.image('platform', 'sprites/platform.png');
+	
+	game.load.image('podium', 'sprites/50x50.png');
 
 }
 var player;
@@ -55,11 +57,28 @@ function create() {
 	accessing = undefined;
 	
 	// section 1
-	podium = podiums.create(100, 200, 'player');
-	podium2 = podiums.create(140, 200, 'player');
+	podium = podiums.create(100, 200, 'podium');
+	podium2 = podiums.create(150, 200, 'podium');
 	
-	left = game.add.sprite(60, 200, 'player');
-	left.alpha = 0;
+	podium_hit_boxes = [];
+	
+	podium_hit_boxes.push(game.add.sprite(50, 200, 'podium'));
+	podium_hit_boxes.push(game.add.sprite(100, 150, 'podium'));
+	podium_hit_boxes.push(game.add.sprite(100, 250, 'podium'));
+	
+	for (var i = 0; i < podium_hit_boxes.length; i++) {
+		podium_hit_boxes[i].alpha = 0.5;
+	}
+	
+	podium2_hit_boxes = [];
+	
+	podium2_hit_boxes.push(game.add.sprite(150, 150, 'podium'));
+	podium2_hit_boxes.push(game.add.sprite(200, 200, 'podium'));
+	podium2_hit_boxes.push(game.add.sprite(150, 250, 'podium'));
+	
+	for (var i = 0; i < podium2_hit_boxes.length; i++) {
+		podium2_hit_boxes[i].alpha = 0.5;
+	}
 	
 	podiums.setAll('body.immovable', true);
 
@@ -86,10 +105,22 @@ function update () {
 
     game.physics.arcade.collide(player, platforms);
 	game.physics.arcade.collide(player, podiums);
+	if (accessing == undefined) {
+		for (var j = 0; j < podium_hit_boxes.length; j++) {
+			if (checkOverlap(player, podium_hit_boxes[j]) && openButton.isDown && accessing !== podium) {
+				console.log("accessing podium");
+				accessing = podium;
+			}
+		}
+	}
 	
-	if (checkOverlap(player, left) && openButton.isDown && accessing !== left) {
-		console.log("accessing podium");
-		accessing = left;
+	if (accessing == undefined) {
+		for (var j = 0; j < podium2_hit_boxes.length; j++) {
+			if (checkOverlap(player, podium2_hit_boxes[j]) && openButton.isDown && accessing !== podium2) {
+				console.log("accessing podium2");
+				accessing = podium2;
+			}
+		}
 	}
 	
     player.body.velocity.x = 0;
